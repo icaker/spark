@@ -323,6 +323,14 @@ class StreamingContext private[streaming] (
     new FileInputDStream[K, V, F](this, directory)
   }
 
+ def fileStreamRecur[
+    K: ClassTag,
+    V: ClassTag,
+    F <: NewInputFormat[K, V]: ClassTag
+  ] (directory: String): InputDStream[(K, V)] = {
+    new FileInputDStreamRecur[K, V, F](this, directory)
+  }
+
   /**
    * Create a input stream that monitors a Hadoop-compatible filesystem
    * for new files and reads them using the given key-value types and input format.
@@ -343,6 +351,14 @@ class StreamingContext private[streaming] (
     new FileInputDStream[K, V, F](this, directory, filter, newFilesOnly)
   }
 
+  def fileStreamRecur[
+    K: ClassTag,
+    V: ClassTag,
+    F <: NewInputFormat[K, V]: ClassTag
+  ] (directory: String, filter: Path => Boolean, newFilesOnly: Boolean): InputDStream[(K, V)] = {
+    new FileInputDStreamRecur[K, V, F](this, directory, filter, newFilesOnly)
+  }
+
   /**
    * Create a input stream that monitors a Hadoop-compatible filesystem
    * for new files and reads them as text files (using key as LongWritable, value
@@ -353,6 +369,9 @@ class StreamingContext private[streaming] (
    */
   def textFileStream(directory: String): DStream[String] = {
     fileStream[LongWritable, Text, TextInputFormat](directory).map(_._2.toString)
+  }
+  def textFileStreamRecur(directory: String): DStream[String] ={
+    fileStreamRecur[LongWritable, Text, TextInputFormat](directory).map(_._2.toString)
   }
 
   /**
