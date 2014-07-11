@@ -43,7 +43,7 @@ class FileInputDStreamRecur[K: ClassTag, V: ClassTag, F <: NewInputFormat[K,V] :
   // Files with mod time earlier than this is ignored. This is updated every interval
   // such that in the current interval, files older than any file found in the
   // previous interval will be ignored. Obviously this time keeps moving forward.
-  private var ignoreTime = if (newFilesOnly) 0L else System.currentTimeMillis()
+  private var ignoreTime = if (newFilesOnly) System.currentTimeMillis() else 0L
   // Latest file mod time seen till any point of time
   @transient private var path_ : Path = null
   @transient private var fs_ : FileSystem = null
@@ -118,7 +118,7 @@ class FileInputDStreamRecur[K: ClassTag, V: ClassTag, F <: NewInputFormat[K,V] :
     lastNewFileFindingTime = System.currentTimeMillis
     val filter = new CustomPathFilter(currentTime)
     val directories = pr.getRecursivePaths(fs,directory)
-    val newFiles = fs.listStatus(directories, filter).map(_.getPath.toString).filter(_contains(".flows")).filterNot(_.contains(".temp")) /*add filterNot */
+    val newFiles = fs.listStatus(directories, filter).map(_.getPath.toString).filter(_.contains(".flows")).filterNot(_.contains(".temp")) /*add filterNot */
     val timeTaken = System.currentTimeMillis - lastNewFileFindingTime
     logInfo("Finding new files took " + timeTaken + " ms")
     logDebug("# cached file times = " + fileModTimes.size)
