@@ -73,22 +73,34 @@ object NetflowParserSQL {
     // Importing the SQL context gives access to all the SQL functions and implicit conversions.
     import sqlContext._
 
+    // If no new files,return [0,0,0] as results
+    if (input.count() == 0){
 
+      println("===============1111111111================")
+      println(input.count())
+      val sc_forRDD = new SparkContext(new SparkConf())
+      val zero_result = Seq("0,0,0")
+      return  sc_forRDD.makeRDD(zero_result,1)
+    }else{
 
-    val first_line = input.first()
+      println("**************else**********************")
+      println("**************"+input.count()+"******************")
 
-    val parsed_input = input.filter(line => line.compareTo(first_line) != 0)
+      val first_line = input.first()
 
-    val tables = parsed_input.map(_.split(",")).map(p => NetflowRecord(p(1).toDouble, p(2), p(3), p(4).toDouble, p(5).toDouble, p(6).toDouble, p(7).toDouble))
+      val parsed_input = input.filter(line => line.compareTo(first_line) != 0)
 
-    // Any RDD containing case classes can be registered as a table.  The schema of the table is
-    // automatically inferred using scala reflection.
-    tables.registerAsTable("records")
+      val tables = parsed_input.map(_.split(",")).map(p => NetflowRecord(p(1).toDouble, p(2), p(3), p(4).toDouble, p(5).toDouble, p(6).toDouble, p(7).toDouble))
 
-    // Once tables have been registered, you can run SQL queries over them.
-    println("sum(in_bytes):")
-    val results = sql("SELECT MIN(FIRST_SWITCHED), SUM(IN_BYTES) * 8 / 60, SUM(OUT_BYTES) * 8 / 60 FROM records")
+      // Any RDD containing case classes can be registered as a table.  The schema of the table is
+      // automatically inferred using scala reflection.
+      tables.registerAsTable("records")
 
-    results.map(line => line.toString)
+      // Once tables have been registered, you can run SQL queries over them.
+      println("sum(in_bytes):")
+      val results = sql("SELECT MIN(FIRST_SWITCHED), SUM(IN_BYTES) * 8 / 60, SUM(OUT_BYTES) * 8 / 60 FROM records")
+
+      return results.map(line => line.toString)
+    }
   }
 }
