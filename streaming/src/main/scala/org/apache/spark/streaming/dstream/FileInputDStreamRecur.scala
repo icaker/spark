@@ -118,7 +118,7 @@ class FileInputDStreamRecur[K: ClassTag, V: ClassTag, F <: NewInputFormat[K,V] :
     lastNewFileFindingTime = System.currentTimeMillis
     val filter = new CustomPathFilter(currentTime)
     val directories = pr.getRecursivePaths(fs,directory)
-    val newFiles = fs.listStatus(directories, filter).map(_.getPath.toString).filter(_.contains(".flows")).filterNot(_.contains(".temp")) /*add filterNot */
+    val newFiles = fs.listStatus(directories,filter).map(_.getPath.toString)/*add filterNot */
     val timeTaken = System.currentTimeMillis - lastNewFileFindingTime
     logInfo("Finding new files took " + timeTaken + " ms")
     logDebug("# cached file times = " + fileModTimes.size)
@@ -252,5 +252,5 @@ class FileInputDStreamRecur[K: ClassTag, V: ClassTag, F <: NewInputFormat[K,V] :
 }
 private[streaming]
 object FileInputDStreamRecur {
-  def defaultFilter(path: Path): Boolean = !path.getName().startsWith(".")
+  def defaultFilter(path: Path): Boolean = (!(path.getName().startsWith(".") || path.getName().endsWith("temp"))) && path.getName().contains("flows")
 }
